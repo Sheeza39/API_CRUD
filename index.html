@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Library Management System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Library Management System</h1>
+
+    
+    <div class="form">
+      <h2>Get Book by ID</h2>
+      <input type="number" id="bookId" placeholder="Enter Book ID">
+      <button onclick="getBookById()">Get Book</button>
+    </div>
+    <div id="specificBook" class="book-info"></div>
+
+    
+    <div class="form">
+      <h2>Add a New Book</h2>
+      <input type="text" id="addBookName" placeholder="Book Name">
+      <input type="text" id="addBookGenre" placeholder="Book Genre">
+      <input type="number" id="addBookQuantity" placeholder="Quantity">
+      <button onclick="createBook()">Add Book</button>
+    </div>
+
+    
+    <div class="form">
+      <h2>Update a Book</h2>
+      <input type="number" id="updateBookId" placeholder="Book ID">
+      <input type="text" id="updateBookName" placeholder="Updated Book Name">
+      <input type="text" id="updateBookGenre" placeholder="Updated Book Genre">
+      <input type="number" id="updateBookQuantity" placeholder="Updated Quantity">
+      <button onclick="updateBook()">Update Book</button>
+    </div>
+
+    
+    <div class="form">
+      <h2>Delete a Book</h2>
+      <input type="number" id="deleteBookId" placeholder="Book ID">
+      <button onclick="deleteBook()">Delete Book</button>
+    </div>
+
+    
+    <button onclick="getBooks()" class="display-btn">Display All Books</button>
+
+  
+    <div id="booksContainer"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
