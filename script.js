@@ -1,130 +1,130 @@
-const apiUrl = 'https://672de0b5fd897971564416bf.mockapi.io/api/library/Library';
+const apiUrl = 'http://localhost:5000/books'; 
 
 
-function getBooks() {
-    fetch(apiUrl)
-        .then(response => response.json())
-        .then(data => {
-            displayBooks(data);
-        })
-        .catch(error => console.error('Error:', error));
-}
-
-
-function displayBooks(books) {
-    const booksContainer = document.getElementById('booksContainer');
-    booksContainer.innerHTML = ''; 
-
-    books.forEach(book => {
-        const bookItem = document.createElement('div');
-        bookItem.classList.add('book-item');
-        bookItem.innerHTML = `
-            <h3>Book Name: ${book.name}</h3>
-            <p>ID: ${book.id}</p>
-            <p>Genre: ${book.Genre}</p>
-            <p>Quantity: ${book.Quantity}</p>
+function fetchBooks() {
+  fetch(apiUrl)
+    .then((response) => response.json())
+    .then((books) => {
+      const booksContainer = document.getElementById('booksContainer');
+      booksContainer.innerHTML = '';
+      books.forEach((book) => {
+        booksContainer.innerHTML += `
+          <div class="book-item">
+            <h3>${book.name}</h3>
+            <p>Genre: ${book.genre}</p>
+            <p>Quantity: ${book.quantity}</p>
+            <p>ID: ${book._id}</p>
+          </div>
         `;
-        booksContainer.appendChild(bookItem);
-    });
+      });
+    })
+    .catch((error) => console.error('Error fetching books:', error));
 }
 
 
-function createBook() {
-    const bookName = document.getElementById('addBookName').value;
-    const bookGenre = document.getElementById('addBookGenre').value;
-    const bookQuantity = document.getElementById('addBookQuantity').value;
+function addBook() {
+  const name = document.getElementById('addBookName').value;
+  const genre = document.getElementById('addBookGenre').value;
+  const quantity = document.getElementById('addBookQuantity').value;
 
-    if (!bookName || !bookGenre || !bookQuantity) {
-        alert('Please fill in all fields');
-        return;
-    }
+  if (!name || !genre || !quantity) {
+    alert('Please fill out all fields!');
+    return;
+  }
 
-    const bookData = {
-        name: bookName,
-        Genre: bookGenre,
-        Quantity: bookQuantity
-    };
+  const bookData = { name, genre, quantity };
 
-    fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(bookData),
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert('Book added successfully');
-        getBooks();  
-    })
-    .catch(error => console.error('Error:', error));
-}
-
-
-function deleteBook() {
-    const bookId = document.getElementById('deleteBookId').value;
-
-    if (!bookId) {
-        alert('Please enter a book ID');
-        return;
-    }
-
-    fetch(`${apiUrl}/${bookId}`, {
-        method: 'DELETE',
-    })
+  fetch(apiUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(bookData),
+  })
     .then(() => {
-        alert('Book deleted successfully');
-        getBooks(); 
+      alert('Book added successfully!');
+      fetchBooks();
     })
-    .catch(error => console.error('Error:', error));
+    .catch((error) => console.error('Error adding book:', error));
 }
-
 
 function getBookById() {
-    const bookId = document.getElementById('bookId').value;
-
+    const bookId = document.getElementById('getBookId').value;
+  
     if (!bookId) {
-        alert('Please enter a book ID');
-        return;
+      alert('Please enter a book ID!');
+      return;
     }
-
+  
     fetch(`${apiUrl}/${bookId}`)
-        .then(response => response.json())
-        .then(book => {
-            alert(`Book details: \nID: ${book.id} \nName: ${book.name} \nGenre: ${book.Genre} \nQuantity: ${book.Quantity}`);
-        })
-        .catch(error => console.error('Error:', error));
-}
-
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Book not found');
+        }
+        return response.json();
+      })
+      .then((book) => {
+        const specificBook = document.getElementById('specificBook');
+        if (book) {
+          specificBook.innerHTML = `
+            <h3>${book.name}</h3>
+            <p>Genre: ${book.genre}</p>
+            <p>Quantity: ${book.quantity}</p>
+          `;
+        } else {
+          specificBook.innerHTML = '<p>Book not found.</p>';
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching book:', error);
+        alert('Failed to fetch book. Please check the ID.');
+      });
+  }
+  
 
 function updateBook() {
     const bookId = document.getElementById('updateBookId').value;
-    const updatedName = document.getElementById('updateBookName').value;
-    const updatedGenre = document.getElementById('updateBookGenre').value;
-    const updatedQuantity = document.getElementById('updateBookQuantity').value;
-
-    if (!bookId || !updatedName || !updatedGenre || !updatedQuantity) {
-        alert('Please fill in all fields');
-        return;
+    const name = document.getElementById('updateBookName').value;
+    const genre = document.getElementById('updateBookGenre').value;
+    const quantity = document.getElementById('updateBookQuantity').value;
+  
+    if (!bookId || !name || !genre || !quantity) {
+      alert('Please fill out all fields!');
+      return;
     }
-
-    const updatedData = {
-        name: updatedName,
-        Genre: updatedGenre,
-        Quantity: updatedQuantity
-    };
-
+  
+    const updatedData = { name, genre, quantity };
+  
     fetch(`${apiUrl}/${bookId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedData),
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedData),
     })
-    .then(response => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Failed to update book');
+        }
+        return response.json();
+      })
+      .then(() => {
+        alert('Book updated successfully!');
+        fetchBooks(); 
+      })
+      .catch((error) => console.error('Error updating book:', error));
+  }
+  
+
+
+function deleteBook() {
+  const bookId = document.getElementById('deleteBookId').value;
+
+  if (!bookId) {
+    alert('Please enter a book ID!');
+    return;
+  }
+
+  fetch(`${apiUrl}/${bookId}`, { method: 'DELETE' })
     .then(() => {
-        alert('Book updated successfully');
-        getBooks();  
+      alert('Book deleted successfully!');
+      fetchBooks();
     })
-    .catch(error => console.error('Error:', error));
+    .catch((error) => console.error('Error deleting book:', error));
 }
