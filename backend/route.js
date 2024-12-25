@@ -5,9 +5,14 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const Book = require('./model');
+const UserAuth = require('./user');
+const bcrypt = require('bcrypt');
+
+
 
 const app = express();
-
+app.set('view engine', 'ejs');
+app.use(express.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.use(cors());
 app.use(cookieParser());
@@ -81,6 +86,81 @@ function isAdmin(req, res, next) {
   }
 }
 
+
+
+
+app.get('/secret', (req, res) => {
+  if (!req.session.user_id) {
+    return  res.redirect('/login');
+  }
+  else {
+      res.render('secret');
+  }
+});
+
+app.get('/', (req, res) => {
+  res.send('This is home page');
+});
+
+app.get('/register', (req, res) => {
+  res.render('register');
+});
+
+app.post('/register', async (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).send('All fields are required');
+  }
+
+  const hash = await bcrypt.hash(password, 12);
+  const user = new UserAuth({
+    username,
+    password: hash,
+  });
+  await user.save();
+  req.session.user_id = user._id;
+  res.redirect('/');
+});
+
+
+
+app.post('/logout', (req, res) => {
+  req.session.user_id = null;
+  res.redirect('/');
+})
+
+
+
+app.get('/login', (req , res) => {
+  res.render('login');
+})
+
+app.post('/login',async (req , res) => {
+  const {username, password } = req.body;
+  const user = await UserAuth.findOne({username});
+  const validPassword = await bcrypt.compare(password, user.password);
+  if (validPassword) {
+      req.session.user_id = user._id;
+      res.redirect('/secret');
+  }
+  else {
+      res.redirect('/login');
+  }
+});
+
+/*
+app.get('/secret',(req,res)=>{
+
+   res.send("Only authorize person can see this")
+
+})
+
+app.get('/register',(req,res)=>{
+
+  res.render('register');
+})  */
+
 app.get('/admin', isAdmin, (req, res) => {
   res.send('Welcome Admin');
 });
@@ -150,9 +230,7 @@ app.put('/books/:id', async (req, res) => {
       { name, genre, quantity },
       { new: true } 
     );
-    if (!updatedBook) {
-      return res.status(404).json({ message: 'Book not found' });
-    }
+   
     res.status(200).json(updatedBook); 
   } catch (error) {
     console.error('Error updating book:', error);
